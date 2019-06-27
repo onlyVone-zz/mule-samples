@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="main" doc:id="2a1b152e-f829-451a-acd6-d048e248da51" >
+		<http:listener doc:name="GET /mail" doc:id="5a13eefc-29a8-4c3d-8541-2579f6694baf" config-ref="HTTP_Listener_config" path="/mail" allowedMethods="GET" />
+		<flow-ref doc:name="getMainPage" doc:id="d5f16122-5297-466c-b9de-d65c779d7e8f" name="getMainPage"/>
+	</flow>
+	<flow name="apiFlow" doc:id="313d29a4-e802-4dd4-810c-5859210d8101" >
+		<http:listener doc:name="POST /mail" doc:id="21e94f06-bdc2-471a-a7e4-6a71059d46e4" config-ref="HTTP_Listener_config" path="/mail" allowedMethods="POST"/>
+		<flow-ref doc:name="processingRequestAndSendMessageToEmail" doc:id="7cdec75e-19ec-4d42-ac33-fbb7a4ac1936" name="processingRequestAndSendMessageToEmail"/>
+	</flow>
+</mule>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="dd29b542-caf9-487c-96c5-2bf2bd5b7a68" file="config.yaml" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="20acc64e-f85a-4387-b63d-c943ed63f384" basePath="/" >
+		<http:listener-connection host="0.0.0.0" port="${host.port}" />
+	</http:listener-config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="0a4f3c6e-1d31-43ba-b160-aa3b9f5e5db5" >
+		<email:smtp-connection 
+			host="${mail.host}" 
+			port="${mail.port}" 
+			user="${mail.user}" 
+			password="${mail.password}">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+</mule>

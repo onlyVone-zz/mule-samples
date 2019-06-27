@@ -1,0 +1,12 @@
+http:
+ port: "8082"
+ 
+db:
+ port: "3306"
+ host: "localhost"
+ username: "onlyone"
+ password: "kxfat92a"
+ database: "mulesoft"
+ 
+redirect:
+ login: "http://localhost:8082/login"
