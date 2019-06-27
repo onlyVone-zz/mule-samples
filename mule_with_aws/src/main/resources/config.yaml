@@ -1,10 +1,10 @@
 http:
- port: "8082"
+ port:
  
 s3:
- accessKey: "AKIA4CK3TPJXUD6UY7PL"
- secretAccessKey: "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"
- bucketName: "tell-me-you-love-me"
+ accessKey:
+ secretAccessKey:
+ bucketName:
  
 path:
- in: "D:/AnypointStudioWorkspace/mule_with_aws/src/main/resources/in"
+ in:
