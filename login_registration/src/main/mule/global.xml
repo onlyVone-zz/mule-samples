@@ -14,8 +14,8 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	</db:config>
 	<configuration doc:name="Configuration" doc:id="f903b862-f3bb-4669-b2e0-07445de23478" defaultErrorHandler-ref="globalError_Handler" />
 	<error-handler name="globalError_Handler" doc:id="06cb5090-d5e2-4610-ad8d-79c0da5fe141" >
-		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="fbc13c5f-8e9f-40f9-940c-c1c98501645f" type="ANY">
-			<set-payload value='#[payload]' doc:name="Set Payload" doc:id="c32c6edc-446c-4354-9852-4ee3de9b4270" />
-		</on-error-continue>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="74aa939a-dd25-46fd-8a9d-1e0c1a89d2eb" type="ANY">
+			<set-payload value="#[payload]" doc:name="Set Payload" doc:id="c32c6edc-446c-4354-9852-4ee3de9b4270" />
+		</on-error-propagate>
 	</error-handler>
 </mule>

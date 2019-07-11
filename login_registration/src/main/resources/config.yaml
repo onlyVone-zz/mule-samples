@@ -1,12 +1,12 @@
 http:
- port:
+ port: "8082"
  
 db:
- port:
- host: 
- username: 
- password: 
- database: 
+ port: "3306"
+ host: "localhost"
+ username: "onlyone"
+ password: "kxfat92a"
+ database: "mulesoft"
  
 redirect:
- login: 
+ login: "http://localhost:8082/login"
