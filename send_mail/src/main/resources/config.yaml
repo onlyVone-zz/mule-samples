@@ -1,8 +1,0 @@
-host:
- port: "8082"
- 
-mail:
- host: "smtp.gmail.com"
- port: "587"
- user: "onlyTwo2111@gmail.com"
- password: "qwert1234asd"
