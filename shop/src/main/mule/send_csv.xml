@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<flow name="sendToCSV" doc:id="a93c5e15-81a9-478e-9829-6a09e86c1dd2" >
+		<http:listener doc:name="POST /csv" doc:id="467e95b0-30fb-44e4-b74f-3d707664b146" config-ref="HTTP_Listener_config" path="/csv"/>
+		<ee:transform doc:name="Transform to needed format JSON" doc:id="3d082700-d1e4-4e56-9f6d-ce4b94ab6217" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (value) -> {
+	"id": value.id,
+	"date": value.date as Date {format: "yyyy/MM/dd"} as String {format: "yyyy-MM-dd"},
+	"user_id": value.user.user_id,
+	"user_name": value.user.name,
+	"user_surname": value.user.surname,
+	"user_email": value.user.email,
+	"good_id": value.good.id,
+	"good_name": value.good.name,
+	"good_price": value.good.price,
+	"good_color": value.good.color
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write data to CSV" doc:id="f964e9d8-af6d-4d83-9d38-731873451fbd" path="#[&quot;$(p('filePath.output_csv'))/output_$(now() as String {format: 'yyyy-MM-dd-HH.mm.SS'})_&quot; ++ attributes.headers.filename]">
+			<file:content ><![CDATA[#[output application/csv header=true --- payload]]]></file:content>
+		</file:write>
+	</flow>
+	
+</mule>

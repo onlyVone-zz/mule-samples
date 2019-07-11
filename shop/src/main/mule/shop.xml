@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+	<flow name="main" doc:id="64468837-fd1d-4aba-a069-95a6b967e833" >
+		<file:listener doc:name="Read information from file" doc:id="8ac892fb-fdc0-4adc-9251-54c24e143964" config-ref="File_Config">
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="SECONDS" />
+			</scheduling-strategy>
+			<file:matcher filenamePattern="*.csv" />
+		</file:listener>
+		<set-variable value="#[attributes.fileName]" doc:name="filename" doc:id="2dc78877-2bc3-4b75-a504-eb30fb19925c" variableName="filename"/>
+		<flow-ref doc:name="validateInputFile_empty" doc:id="3eecd4f4-dbff-40d1-843b-a9eb11edf889" name="validateInputFile_empty"/>
+		<flow-ref doc:name="CSV to JSON" doc:id="fdbbbb1b-d77a-4084-a203-8a44851d0325" name="CSVtoJSON"/>
+		<flow-ref doc:name="validateJSON" doc:id="2d7677d8-38aa-43af-a78a-e6511359f0f3" name="validateJSON"/>
+		<flow-ref doc:name="POST /enrich" doc:id="68f5ef30-913e-4c0d-96b8-b87714a4b352" name="POSTenrich"/>
+		<flow-ref doc:name="enrich information" doc:id="5823229a-3ade-4564-8a86-f444642eebab" name="enrichData"/>
+		<flow-ref doc:name="move input file to processed if success" doc:id="8a35916b-001e-4bae-963f-0d662bc1afb0" name="moveInputToProcessedIfSuccess"/>
+		<flow-ref doc:name="Send full data to all services" doc:id="efb1eabe-94fb-4bcd-a238-bc1d6e1eefd3" name="sendFullDataToAllServices"/>
+	</flow>
+	<flow name="validateJSON" doc:id="4e56f04b-af47-411d-ac00-d75033b08120" >
+		<flow-ref doc:name="variablesForValidationJSON" doc:id="abec88ba-bd4f-459d-b335-7900614eecc6" name="variablesForValidationJSON"/>
+		<set-payload value='#[vars.middle]' doc:name="payload" doc:id="4ce832e1-441e-4f67-b6aa-20d5c9536cca" />
+		<foreach doc:name="validateJSON" doc:id="922ba57b-3edc-4428-ac88-e745986a3a02" >
+			<try doc:name="Try" doc:id="9d386e2c-88f2-4979-9c16-844baa9867e8" >
+				<json:validate-schema doc:name="Validate input object" doc:id="7cfc671d-59af-4447-ba13-2814a1cdfa3a" schema="schemas/input_json.json" />
+				<ee:transform doc:name="Orders without errors" doc:id="12ae68d3-6abd-4ef5-b682-5a4e4ae3d9c7">
+				<ee:message>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="notErrorsCSV"><![CDATA[%dw 2.0
+output application/json
+---
+vars.notErrorsCSV + payload]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1ba8e5e1-7e4e-4ed5-918e-d0ea1c8f9b22" type="ANY">
+						<ee:transform doc:name="Orders with errors" doc:id="b72c36b1-4917-43ce-9e79-2aa026c25b83">
+							<ee:message>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable variableName="errorsCSV"><![CDATA[%dw 2.0
+output application/json
+---
+vars.errorsCSV + payload]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</foreach>
+		<flow-ref doc:name="writeInvalidDataFromCSV" doc:id="813ef3a9-136c-4255-8cc0-46667ba90591" name="writeInvalidDataFromCSV"/>
+		<ee:transform doc:name="Without errors" doc:id="5e300d05-6df9-4b28-884b-ba1cf2fb58dd">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.notErrorsCSV]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="writeInvalidDataFromCSV" doc:id="de45b444-134c-48dc-b41f-30af815bfc5e" >
+		<try doc:name="Try" doc:id="b8e16a64-6604-490f-b022-92b1a553269d" >
+			<validation:is-not-empty-collection doc:name="Without errors var is not empty " doc:id="99cc0ecb-5a29-4108-8638-9eec074ced29" values="#[vars.notErrorsCSV]" />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="68e1a20f-8037-421f-8574-1b02a44f12c7" type="VALIDATION:EMPTY_COLLECTION">
+					<file:move doc:name="Move input file to 'error' folder" doc:id="6e33f60c-85bd-48bb-b41a-e7941568ce4c" sourcePath="#[&quot;$(p('filePath.input'))&quot; ++ vars.filename]" targetPath="${filePath.to_error}" renameTo="#[&quot;invalidCSV_$(now() as String {format: 'yyyy-MM-dd-HH.mm.SS'})_&quot; ++ vars.filename]"/>
+					<set-payload value='#["Invalid CSV input!"]' doc:name="Invalid CSV input" doc:id="73dfd0d2-895c-4665-bdaa-ec66b94388e0" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<try doc:name="Try" doc:id="20b67b9a-6e52-46f1-9325-90565216fc2f" >
+			<validation:is-empty-collection doc:name="errorsCSV is empty" doc:id="b594b492-215e-49fb-8740-76731b773d7f" values="#[vars.errorsCSV]"/>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b061bf43-7890-416c-bf67-cbd523c8cb18" type="VALIDATION:NOT_EMPTY_COLLECTION">
+					<file:write doc:name="Write invalid objects from JSON to error folder" doc:id="6b8dfecb-5aef-43f8-a080-a16b589b3926" path="#[&quot;$(p('filePath.to_error'))/error_$(now() as String {format: 'yyyy-MM-dd-HH.mm.SS'})_&quot; ++ vars.filename]">
+			<file:content><![CDATA[#[output application/csv header=true --- vars.errorsCSV]]]></file:content>
+		</file:write>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</flow>
+	<flow name="variablesForValidationJSON" doc:id="36951d82-1eff-4731-8333-9e0dbba06a66" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="5e1a38b2-5071-4012-9cda-39cf479fb6d5">
+			<route>
+				<set-variable value="#[[]]" doc:name="errors CSV" doc:id="115cc44a-e7ef-4c49-8c8a-176bce196bd6" variableName="errorsCSV" />
+			</route>
+			<route>
+				<set-variable value="#[[]]" doc:name="without errors CSV" doc:id="d45abe75-7337-4e9d-ac59-629f72b37885" variableName="notErrorsCSV" />
+			</route>
+		</scatter-gather>
+	</flow>
+	<flow name="POSTenrich" doc:id="94063cb6-eff4-428f-b401-d16343a957ca" >
+		<http:request method="POST" doc:name="POST /enrich" doc:id="b9c139ab-da74-49d1-bfb4-4a3cd1cd7f1d" path="${req.endpoint_enrich}" config-ref="HTTP_Request_configuration" />
+	</flow>
+	<flow name="sendFullDataToAllServices" doc:id="f44190b9-6313-41d5-9cd4-4323416f0d0b" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="c9c90979-bc4f-49b5-96a3-9af740f9314c">
+			<route>
+				<http:request method="POST" doc:name="POST /csv" doc:id="422a024b-3c7c-4129-9070-d7e9a9ae6c69" path="${req.endpoint_csv}" config-ref="HTTP_Request_configuration" >
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"filename" : vars.filename
+}]]]></http:headers>
+				</http:request>
+			</route>
+			<route>
+				<http:request method="POST" doc:name="POST /xml" doc:id="f8e5b20c-df13-4703-9e07-80536a199c85" config-ref="HTTP_Request_configuration" path="${req.endpoint_xml}" >
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"filename" : vars.filename
+}]]]></http:headers>
+				</http:request>
+			</route>
+			<route>
+				<http:request method="POST" doc:name="POST /java" doc:id="e91d20ea-0d4d-414a-b5da-ccce564a8070" config-ref="HTTP_Request_configuration" path="${req.endpoint_java}" >
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"filename" : vars.filename
+}]]]></http:headers>
+				</http:request>
+			</route>
+		</scatter-gather>
+	</flow>
+	<flow name="moveInputToProcessedIfSuccess" doc:id="8966efa7-b790-44d6-805f-e9ac23a7f829" >
+		<file:move doc:name="Move to processed" doc:id="2869785f-3912-41cd-93e8-cf6f367401a6" sourcePath="#[&quot;$(p('filePath.input'))&quot; ++ vars.filename]" targetPath="${filePath.processed}" renameTo="#[&quot;processed_$(now() as String {format: 'yyyy-MM-dd-HH.mm.SS'})_&quot; ++ vars.filename]" />
+	</flow>
+	<flow name="createEnrichVariables" doc:id="d7ad13f7-99f3-4060-b535-2830751ea968" >
+		<set-variable value="#[[]]" doc:name="enrichError" doc:id="e0ae9620-570c-409f-8592-6607d8f441bc" variableName="enrichError"/>
+		<set-variable value="#[[]]" doc:name="enrich" doc:id="5baefb8d-57f8-4e86-bc03-6ecfc9d17ebd" variableName="enrich"/>
+	</flow>
+	<flow name="enrichData" doc:id="800075a9-0c8a-44b7-a310-24ebd7ac8171" >
+		<ee:transform doc:name="Enrich information" doc:id="02c3aeae-40a3-4cf6-8a90-5188b5868a3c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+fun buildStructureWithNull (arr, payload) = 
+	arr map (value) -> {
+		"id": value.id,
+		"date": value.date,
+		"user": (payload.users filter $.user_id == value.id_user)[0],
+		"good": (payload.goods filter $.id == value.id_good)[0]
+}
+---
+buildStructureWithNull (vars.middle, payload)]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="result"><![CDATA[%dw 2.0
+output application/json
+---
+vars.middle map (value) -> {
+	"id": value.id,
+	"date": value.date,
+	"user": (payload.users filter $.user_id == value.id_user)[0],
+	"good": (payload.goods filter $.id == value.id_good)[0]
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="createEnrichVariables" doc:id="07573124-64df-4eb7-9dc3-f69ca8a45396" name="createEnrichVariables"/>
+		<foreach doc:name="For Each" doc:id="f726fe74-7e5b-4abf-8de5-3702ff05d6da" >
+			<try doc:name="Try" doc:id="738b2135-87f3-4efb-bd38-1e616d2aa835" >
+				<validation:is-false doc:name="user is null" doc:id="73340a4e-2612-4272-b482-8d19d0b949c9" expression="#[payload.user == null]"/>
+				<validation:is-false doc:name="good is null" doc:id="20b8d30d-09ca-4743-a468-7ea3b2aeb7b6" expression="#[payload.good == null]"/>
+				<ee:transform doc:name="Reassign enrich" doc:id="bb1ebdbd-732c-4ec8-b23c-6b3a7f57f5ad" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="enrich" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.enrich + payload]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="866195a5-b630-4893-9676-7e42e378ad93" type="VALIDATION:INVALID_BOOLEAN">
+						<ee:transform doc:name="Reassign enrichError" doc:id="e8619cdd-0cc0-4407-b721-441ea0a433b2" >
+							<ee:message >
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="enrichError" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.enrichError + payload]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</foreach>
+		<ee:transform doc:name="errorsFromAkeneoToFile" doc:id="7a00bb14-9c76-4485-b0cd-5c781d2f9a7d" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="errorsFromAkeneoToFile" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.enrichError map (value) -> {
+    "id": value.id,
+    "id_user": (vars.middle filter $.id == value.id)[0].id_user,
+    "date": (vars.middle filter $.id == value.id)[0].date,
+    "id_good": (vars.middle filter $.id == value.id)[0].id_good
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="lastValidationJSONArrayFromENRICHAndWriteErrorsIntoErrorFile" doc:id="6b3f25a8-152d-4023-a317-f0e1ef4115cc" name="lastValidationJSONArrayFromENRICHAndWriteErrorsIntoErrorFile"/>
+		<ee:transform doc:name="Enrich data" doc:id="0792db49-5bbb-479d-93a8-0a243f91737c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.enrich]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="lastValidationJSONArrayFromENRICHAndWriteErrorsIntoErrorFile" doc:id="cbbe200b-9e08-4158-82dd-a1b3b0ac8be7" >
+		<try doc:name="Try" doc:id="33b8e5ff-da4f-4bf2-9def-5453337564cf" >
+			<validation:is-not-empty-collection doc:name="enrich is not empty" doc:id="c5f5a5d7-d811-4df1-ba2f-21d7ff80d564" values="#[vars.enrich]"/>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1f97f403-aea3-437d-a37f-1a55f9ea246f" type="VALIDATION:EMPTY_COLLECTION">
+					<file:move doc:name="Invalid output from Akeneo" doc:id="59821e19-630a-4e08-9877-46ddef2619a8" sourcePath="#[&quot;$(p('filePath.input'))&quot; ++ vars.filename]" targetPath="${filePath.to_error}" renameTo="#[&quot;invalidOutputFromAkeneo_$(now() as String {format: 'yyyy-MM-dd-HH.mm.SS'})_&quot; ++ vars.filename]"/>
+					<set-payload value='#["Invalid output from Akeneo"]' doc:name="Set Payload" doc:id="85234802-6b82-4c69-8cd2-662bd18c6613" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<try doc:name="Try" doc:id="9f06c3fa-6037-495d-8466-0a39afc97d9d" >
+			<validation:is-empty-collection doc:name="enrichError is empty" doc:id="3f14493a-fcc2-4cce-8fe6-8c8b022f241a" values="#[vars.enrichError]"/>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="cd3c7851-1916-436d-830b-c33b59aa3ece" type="VALIDATION:NOT_EMPTY_COLLECTION">
+					<file:write doc:name="Invalid input from Akeneo" doc:id="d044a594-5c82-4158-ab63-36b5fca14354" path="#[&quot;$(p('filePath.to_error'))/invalidOutputFromAkeneo_$(now() as String {format: 'yyyy-MM-dd-HH.mm.SS'})_&quot; ++ vars.filename]">
+						<file:content><![CDATA[#[output application/csv header=true --- vars.errorsFromAkeneoToFile]]]></file:content>
+					</file:write>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</flow>
+	<flow name="CSVtoJSON" doc:id="d1c8981f-0a48-459c-a26b-9f7cd6cc80d9" >
+		<ee:transform doc:name="CSV to JSON" doc:id="ac454e95-fd02-4351-9b09-d98e456f03f9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (value, index) -> {
+	"id": value.id as Number,
+	"id_user": value.id_user as Number,
+	"date": value.date as Date {format: "yyyy/MM/dd"},
+	"id_good": value.id_good as Number
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="middle"><![CDATA[%dw 2.0
+output application/json
+---
+payload map (value, index) -> {
+	"id": value.id as Number,
+	"id_user": value.id_user as Number,
+	"date": value.date as Date {format: "yyyy/MM/dd"},
+	"id_good": value.id_good as Number
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+	<flow name="validateInputFile_empty" doc:id="e9574af8-c112-47ff-bc2f-eb7409db61d9" >
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="dcee9132-06da-4447-b573-445a1973f303" message="Input file is empty!"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ef5777ec-5ffd-456e-816d-78ee8652ab3d" type="VALIDATION:EMPTY_COLLECTION">
+				<file:move doc:name="Move to error's folder" doc:id="ebd35934-bc8b-41ab-b081-45b5b31428d1" sourcePath="#[&quot;$(p('filePath.input'))/&quot; ++ vars.filename]" createParentDirectories="false" renameTo="#[&quot;error_empty_$(now() as String {format: 'yyyy-MM-dd-HH.mm.ss'})_&quot; ++ vars.filename]" targetPath="${filePath.to_error_empty}"/>
+				<set-payload value='#["Input collection is empty!"]' doc:name="Input collection is empty" doc:id="84082b97-1d24-4840-8fcd-379deb5d47a3" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

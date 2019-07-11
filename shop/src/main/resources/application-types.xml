@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="goods_json" format="json">
+      <types:shape format="weave" example="samples/goods.json"><![CDATA[%dw 2.0
+
+type goods_json = {|
+  color: String, 
+  price: Number {"typeId": "double"}, 
+  name: String, 
+  id: Number {"typeId": "int"}
+|} {"example": "{\"color\":\"black\",\"price\":85.0,\"name\":\"SWIFT RUN SHOES\",\"id\":1}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="users_json" format="json">
+      <types:shape format="weave" example="samples/users.json"><![CDATA[%dw 2.0
+
+type users_json = {|
+  user_id: Number {"typeId": "int"}, 
+  surname: String, 
+  name: String, 
+  email: String
+|} {"example": "{\"user_id\":1,\"surname\":\"Yarmoshyk\",\"name\":\"Valentyn\",\"email\":\"vll1y@meta.ua\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#7372ae8b-d0c1-41a4-a7fb-f27565b5c594">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="goods_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#d1e1c77f-075e-4064-b98c-2038c68f60cb">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="users_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#351903b9-c5e1-4c65-9001-6012b529ba35"/>
+  <types:enrichment select="#d5b75003-da59-4e56-bcda-25b853c9ab57"/>
+</types:mule>

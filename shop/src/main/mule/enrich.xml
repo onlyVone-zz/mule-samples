@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+	<flow name="enrichInformation" doc:id="27ec063d-2e8d-442d-a6cf-3ce95e9333db" >
+		<http:listener doc:name="POST /enrich" doc:id="1487f00a-562a-4c3f-8c71-c6974a28594b" config-ref="HTTP_Listener_config" path="/enrich" allowedMethods="POST" />
+		<flow-ref doc:name="InitialVariables" doc:id="90e86dd5-c593-4ffe-9f96-672a15fbf556" name="InitialVariables"/>
+		<foreach doc:name="For Each" doc:id="87d526fc-cec3-4e4c-9ed4-55dbc86575a2" >
+			<scatter-gather doc:name="Select from db" doc:id="2383f8b1-e0c8-41c7-a6ff-061b843978dd">
+			<route>
+					<db:select doc:name="Select users" doc:id="da69b377-dce7-4a5a-9414-8cf4913a7a29" config-ref="Database_Config" target="user" targetValue="#[payload[0]]">
+					<db:sql>select * from users where user_id = :id_user</db:sql>
+					<db:input-parameters><![CDATA[#[{"id_user": payload.id_user}]]]></db:input-parameters>
+				</db:select>
+					<ee:transform doc:name="Reassign users" doc:id="c6e3a472-789f-435f-b506-abc063755fc9" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="users" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.users + vars.user]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+			</route>
+			<route>
+					<db:select doc:name="Select goods" doc:id="65b8d0d3-0e93-40f4-9fe0-8b6e7fbb04d3" config-ref="Database_Config" target="good" targetValue="#[payload[0]]">
+					<db:sql>select * from goods where id = :id_good</db:sql>
+					<db:input-parameters><![CDATA[#[{"id_good": payload.id_good}]]]></db:input-parameters>
+				</db:select>
+					<ee:transform doc:name="Reassign goods" doc:id="de5a6d51-8ba0-45d0-aca5-b7a3959d0a34" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="goods" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.goods + vars.good]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+			</route>
+		</scatter-gather>
+		</foreach>
+		<ee:transform doc:name="Convert to variable" doc:id="3f704d70-d341-4117-a6cc-f36d6b870588">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"users": vars.users,
+	"goods": vars.goods
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="InitialVariables" doc:id="4bd8cb24-bd00-480b-af15-8cb0fce442c6" >
+		<ee:transform doc:name="Init users" doc:id="e8f78cf4-6882-41c5-9bf9-c79a8b7a27c3" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="users" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Init goods" doc:id="5b93634f-52d3-432f-b0f6-954a19ac11f2" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="goods" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+		
+	
+</mule>

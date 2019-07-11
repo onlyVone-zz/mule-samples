@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="send_javaFlow" doc:id="8c35dc48-b2d7-43fa-ad86-bf332b2fef8d" >
+		<http:listener doc:name="POST /java" doc:id="64a11b66-91ba-4201-8421-65e6c3eefda0" config-ref="HTTP_Listener_config" path="/java"/>
+		<file:write doc:name="Write" doc:id="b4651850-ba7d-4f96-93b0-cb788e70f5f2" path="#[&quot;$(p('filePath.output_java'))/output_$(now() as String {format: 'yyyy-MM-dd-HH.mm.SS'})_&quot; ++ attributes.headers.filename ++ &quot;.java&quot;]">
+			<file:content ><![CDATA[#[output application/java --- payload]]]></file:content>
+		</file:write>
+	</flow>
+</mule>

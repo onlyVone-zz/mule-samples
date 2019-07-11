@@ -1,0 +1,28 @@
+http:
+ port: "8082"
+ 
+filePath:
+ input: "D:/AnypointStudioWorkspace/forGIT/shop/files/input/"
+ processed: "D:/AnypointStudioWorkspace/forGIT/shop/files/processed/"
+ output: "D:/AnypointStudioWorkspace/forGIT/shop/files/output/"
+ output_csv: "D:/AnypointStudioWorkspace/forGIT/shop/files/output/output_csv"
+ output_xml: "D:/AnypointStudioWorkspace/forGIT/shop/files/output/output_xml"
+ output_java: "D:/AnypointStudioWorkspace/forGIT/shop/files/output/output_java"
+ test: "D:/AnypointStudioWorkspace/forGIT/shop/files/test/sample1.csv"
+ to_error_empty: "D:/AnypointStudioWorkspace/forGIT/shop/files/error/empty/"
+ to_error: "D:/AnypointStudioWorkspace/forGIT/shop/files/error"
+ 
+db:
+ host: "127.0.0.1"
+ port: "3306"
+ username: "onlyone"
+ password: "kxfat92a"
+ name: "shop_test"
+ 
+req:
+ endpoint_enrich: "/enrich"
+ host: "localhost"
+ port: "8082"
+ endpoint_csv: "/csv"
+ endpoint_xml: "/xml"
+ endpoint_java: "/java"

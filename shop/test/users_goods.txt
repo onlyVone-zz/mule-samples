@@ -1,0 +1,66 @@
+{
+  "users": [
+    {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    {
+      "user_id": 2,
+      "surname": "Yarmoshyk",
+      "email": "paul@gmail.com",
+      "name": "Pavlo"
+    },
+    {
+      "user_id": 3,
+      "surname": "Vdovychyn",
+      "email": "octap16@gmail.com",
+      "name": "Ostap"
+    },
+    {
+      "user_id": 4,
+      "surname": "Hto",
+      "email": "hzhto@gmail.com",
+      "name": "HZ"
+    }
+  ],
+  "goods": [
+    {
+      "color": "black",
+      "price": 85.0,
+      "name": "SWIFT RUN SHOES",
+      "id": 1
+    },
+    {
+      "color": "white",
+      "price": 96.0,
+      "name": "PUREBOOST GO SHOES",
+      "id": 2
+    },
+    {
+      "color": "black",
+      "price": 75.0,
+      "name": "U_PATH RUN SHOES",
+      "id": 3
+    },
+    {
+      "color": "white",
+      "price": 115.0,
+      "name": "DAME 5 SHOES",
+      "id": 4
+    },
+    {
+      "color": "black",
+      "price": 180.0,
+      "name": "ULTRABOOST 19 SHOES",
+      "id": 5
+    }
+  ]
+}

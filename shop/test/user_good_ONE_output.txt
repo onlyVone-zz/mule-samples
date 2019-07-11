@@ -1,0 +1,14 @@
+{
+  "user": {
+    "user_id": 1,
+    "surname": "Yarmoshyk",
+    "email": "vll1y@meta.ua",
+    "name": "Valentyn"
+  },
+  "good": {
+    "color": "black",
+    "price": 85.0,
+    "name": "SWIFT RUN SHOES",
+    "id": 1
+  }
+}

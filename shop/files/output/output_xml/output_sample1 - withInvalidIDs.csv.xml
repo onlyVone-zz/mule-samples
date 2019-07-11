@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='windows-1251'?>
+<orders>
+  <order id="2">
+    <id>2</id>
+    <date>2019/11/30</date>
+    <user>
+      <user_id>1</user_id>
+      <surname>Yarmoshyk</surname>
+      <email>vll1y@meta.ua</email>
+      <name>Valentyn</name>
+    </user>
+    <good>
+      <color>white</color>
+      <price>96</price>
+      <name>PUREBOOST GO SHOES</name>
+      <id>2</id>
+    </good>
+  </order>
+</orders><?xml version='1.0' encoding='windows-1251'?>
+<orders>
+  <order id="5">
+    <id>5</id>
+    <date>2019/04/20</date>
+    <user>
+      <user_id>4</user_id>
+      <surname>Hto</surname>
+      <email>hzhto@gmail.com</email>
+      <name>HZ</name>
+    </user>
+    <good>
+      <color>black</color>
+      <price>180</price>
+      <name>ULTRABOOST 19 SHOES</name>
+      <id>5</id>
+    </good>
+  </order>
+</orders>

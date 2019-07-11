@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="enrich-test-suite.xml" />
+	<munit:test name="enrich-test-suite-InitialVariablesTest" description="Test" doc:id="a6459791-4390-4a3d-8c16-2018b02e56a2" >
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to InitialVariables" doc:id="2316277b-8e7d-4819-a6d7-d60e0d4a9d84" name="InitialVariables"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="users == []" doc:id="8177f896-e41c-4656-b159-7fa335756f65" expression="#[vars.users]" is="#[MunitTools::equalTo([])]"/>
+			<munit-tools:assert-that doc:name="goods == []" doc:id="138be07a-9742-4350-b461-1b55d4ad006e" expression="#[vars.goods]" is="#[MunitTools::equalTo([])]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="enrich-test-suiteTest" description="MUnit Test" doc:id="0987e23d-63ea-4355-ba82-8f5eea880075" >
+		<munit:execution >
+			<set-variable value='#[{
+  "users": [
+    {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    {
+      "user_id": 2,
+      "surname": "Yarmoshyk",
+      "email": "paul@gmail.com",
+      "name": "Pavlo"
+    },
+    {
+      "user_id": 3,
+      "surname": "Vdovychyn",
+      "email": "octap16@gmail.com",
+      "name": "Ostap"
+    },
+    {
+      "user_id": 4,
+      "surname": "Hto",
+      "email": "hzhto@gmail.com",
+      "name": "HZ"
+    }
+  ],
+  "goods": [
+    {
+      "color": "black",
+      "price": 85.0,
+      "name": "SWIFT RUN SHOES",
+      "id": 1
+    },
+    {
+      "color": "white",
+      "price": 96.0,
+      "name": "PUREBOOST GO SHOES",
+      "id": 2
+    },
+    {
+      "color": "black",
+      "price": 75.0,
+      "name": "U_PATH RUN SHOES",
+      "id": 3
+    },
+    {
+      "color": "white",
+      "price": 115.0,
+      "name": "DAME 5 SHOES",
+      "id": 4
+    },
+    {
+      "color": "black",
+      "price": 180.0,
+      "name": "ULTRABOOST 19 SHOES",
+      "id": 5
+    }
+  ]
+}]' doc:name="result" doc:id="a3d63f16-caf1-4db9-8aac-7220b0950099" variableName="result"/>
+			<set-payload value='#[[
+  {
+    "id": 1,
+    "id_user": 1,
+    "date": "2018/10/06",
+    "id_good": 1
+  },
+  {
+    "id": 2,
+    "id_user": "1",
+    "date": "2019/11/30",
+    "id_good": 2
+  },
+  {
+    "id": 3,
+    "id_user": 2,
+    "date": "2019/10/15",
+    "id_good": 3
+  },
+  {
+    "id": 4,
+    "id_user": 3,
+    "date": "2019/05/19",
+    "id_good": 4
+  },
+  {
+    "id": 5,
+    "id_user": 4,
+    "date": "2019/04/20",
+    "id_good": 5
+  }
+]]' doc:name="payload" doc:id="6a45be17-e709-4194-a852-f061cd08f7d3" />
+			<flow-ref doc:name="Flow-ref to enrichInformation" doc:id="3a53d1a1-1023-45e4-bb8a-4069cfd75d8e" name="enrichInformation"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="aab70355-c46c-46ed-bc52-1fa703694100" expression="#[payload]" is="#[MunitTools::equalTo(vars.result)]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

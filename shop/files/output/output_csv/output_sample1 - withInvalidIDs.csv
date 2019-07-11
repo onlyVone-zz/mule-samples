@@ -1,0 +1,4 @@
+id,date,user_id,user_name,user_surname,user_email,good_id,good_name,good_price,good_color
+2,2019-11-30,1,Valentyn,Yarmoshyk,vll1y@meta.ua,2,PUREBOOST GO SHOES,96,white
+id,date,user_id,user_name,user_surname,user_email,good_id,good_name,good_price,good_color
+5,2019-04-20,4,HZ,Hto,hzhto@gmail.com,5,ULTRABOOST 19 SHOES,180,black

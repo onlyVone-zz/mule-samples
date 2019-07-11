@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="shop-test-suite.xml" />
+	<munit:test name="fileIsEmpty_test" description="Test" doc:id="6cbc8e74-fde4-4ac4-8cc8-0561ea8e360a" expectedErrorType="VALIDATION:EMPTY_COLLECTION" ignore="true">
+		<munit:execution >
+			<munit:set-null-payload doc:name="Set null payload" doc:id="bcbb2102-5107-4f28-8fb8-30830105f332" />
+			<flow-ref doc:name="Flow-ref to validateInputFile_empty" doc:id="e3ce5e06-265d-4749-9672-f2a138031b0e" name="validateInputFile_empty"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="CSVtoJSON_test" description="MUnit Test" doc:id="0846dfda-033c-467c-af55-ed065dc3c19d" >
+		<munit:execution >
+			<set-variable value='#[[
+  {
+    "id": 1,
+    "id_user": 1,
+    "date": "2018/10/06",
+    "id_good": 1
+  },
+  {
+    "id": 2,
+    "id_user": 1,
+    "date": "2019/11/30",
+    "id_good": 2
+  },
+  {
+    "id": 3,
+    "id_user": 2,
+    "date": "2019/10/15",
+    "id_good": 3
+  },
+  {
+    "id": 4,
+    "id_user": 3,
+    "date": "2019/05/19",
+    "id_good": 4
+  },
+  {
+    "id": 5,
+    "id_user": 4,
+    "date": "2019/04/20",
+    "id_good": 5
+  }
+]]' doc:name="result" doc:id="d883acbd-248f-4faf-87ff-6daac2e1d535" variableName="result"/>
+			<file:read doc:name="Read test csv file" doc:id="7bfd97e5-0191-4c63-9c33-d9012cf66499" path="${filePath.test}"/>
+			<flow-ref doc:name="Flow-ref to CSVtoJSON" doc:id="bffc4542-3c70-4866-a701-a22b2763492c" name="CSVtoJSON"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="ceaf2f0d-23bf-4f8e-8109-43c2b4988f40" expression="#[payload]" is="#[MunitTools::equalTo(vars.result)]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="enrichInformation_test" description="MUnit Test" doc:id="5185dcf0-2aa1-484c-ac57-b733553ab3f1" >
+		<munit:execution >
+			<set-variable value='#[[
+  {
+    "id": 1,
+    "id_user": 1,
+    "date": "2018/10/06",
+    "id_good": 1
+  },
+  {
+    "id": 2,
+    "id_user": 1,
+    "date": "2019/11/30",
+    "id_good": 2
+  },
+  {
+    "id": 3,
+    "id_user": 2,
+    "date": "2019/10/15",
+    "id_good": 3
+  },
+  {
+    "id": 4,
+    "id_user": 3,
+    "date": "2019/05/19",
+    "id_good": 4
+  },
+  {
+    "id": 5,
+    "id_user": 4,
+    "date": "2019/04/20",
+    "id_good": 5
+  }
+]]' doc:name="middle" doc:id="a9d0bd21-4c23-4684-be44-cd813ada199d" variableName="middle"/>
+			<set-variable value='#[[
+  {
+    "id": 1,
+    "date": "2018/10/06",
+    "user": {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    "good": {
+      "color": "black",
+      "price": 85.0,
+      "name": "SWIFT RUN SHOES",
+      "id": 1
+    }
+  },
+  {
+    "id": 2,
+    "date": "2019/11/30",
+    "user": {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    "good": {
+      "color": "white",
+      "price": 96.0,
+      "name": "PUREBOOST GO SHOES",
+      "id": 2
+    }
+  },
+  {
+    "id": 3,
+    "date": "2019/10/15",
+    "user": {
+      "user_id": 2,
+      "surname": "Yarmoshyk",
+      "email": "paul@gmail.com",
+      "name": "Pavlo"
+    },
+    "good": {
+      "color": "black",
+      "price": 75.0,
+      "name": "U_PATH RUN SHOES",
+      "id": 3
+    }
+  },
+  {
+    "id": 4,
+    "date": "2019/05/19",
+    "user": {
+      "user_id": 3,
+      "surname": "Vdovychyn",
+      "email": "octap16@gmail.com",
+      "name": "Ostap"
+    },
+    "good": {
+      "color": "white",
+      "price": 115.0,
+      "name": "DAME 5 SHOES",
+      "id": 4
+    }
+  },
+  {
+    "id": 5,
+    "date": "2019/04/20",
+    "user": {
+      "user_id": 4,
+      "surname": "Hto",
+      "email": "hzhto@gmail.com",
+      "name": "HZ"
+    },
+    "good": {
+      "color": "black",
+      "price": 180.0,
+      "name": "ULTRABOOST 19 SHOES",
+      "id": 5
+    }
+  }
+]]' doc:name="result" doc:id="f2d6ca3f-ba5f-4451-bd0c-f8c6fd43d511" variableName="result"/>
+			<set-payload value='#[{
+  "users": [
+    {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    {
+      "user_id": 1,
+      "surname": "Yarmoshyk",
+      "email": "vll1y@meta.ua",
+      "name": "Valentyn"
+    },
+    {
+      "user_id": 2,
+      "surname": "Yarmoshyk",
+      "email": "paul@gmail.com",
+      "name": "Pavlo"
+    },
+    {
+      "user_id": 3,
+      "surname": "Vdovychyn",
+      "email": "octap16@gmail.com",
+      "name": "Ostap"
+    },
+    {
+      "user_id": 4,
+      "surname": "Hto",
+      "email": "hzhto@gmail.com",
+      "name": "HZ"
+    }
+  ],
+  "goods": [
+    {
+      "color": "black",
+      "price": 85.0,
+      "name": "SWIFT RUN SHOES",
+      "id": 1
+    },
+    {
+      "color": "white",
+      "price": 96.0,
+      "name": "PUREBOOST GO SHOES",
+      "id": 2
+    },
+    {
+      "color": "black",
+      "price": 75.0,
+      "name": "U_PATH RUN SHOES",
+      "id": 3
+    },
+    {
+      "color": "white",
+      "price": 115.0,
+      "name": "DAME 5 SHOES",
+      "id": 4
+    },
+    {
+      "color": "black",
+      "price": 180.0,
+      "name": "ULTRABOOST 19 SHOES",
+      "id": 5
+    }
+  ]
+}]' doc:name="usersANDgoods" doc:id="b9a3a0c6-e715-4628-b6d5-e21d05e889d6" />
+			<flow-ref doc:name="enrichData" doc:id="e5c1b6fe-980e-44a9-b61d-22b8fb9a1864" name="enrichData"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="50759a81-bf51-4da8-8c3b-d8421f2a6b48" is="#[MunitTools::equalTo(vars.result)]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

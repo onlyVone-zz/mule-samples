@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="aed77b26-1129-4545-8f37-80ec20e23a8a" file="config.yaml" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="480ae0f2-7b4a-4aad-b469-2334a2779420" basePath="/" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" connectionIdleTimeout="300000000"/>
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="7492ebf4-dbe9-436b-a710-75243576422a" >
+		<file:connection workingDir="${filePath.input}" />
+	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="0fa191ca-ff85-4089-82da-353398374164" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.username}" password="${db.password}" database="${db.name}"/>
+	</db:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="9bc47952-9662-4d63-bc95-aa0f37ab309b">
+		<http:request-connection host="${req.host}" port="${req.port}" connectionIdleTimeout="30000000" />
+	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="f57ab729-032e-4c14-9a68-8d9a360e2eb7" defaultErrorHandler-ref="globalError_Handler" />
+	<error-handler name="globalError_Handler" doc:id="21335b24-7f97-47d2-9a4c-aafd16521290" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cd96e1ef-2870-43bb-9e8b-078a6d295bb4" type="ANY">
+			<set-payload value="#[payload]" doc:name="payload" doc:id="659da001-889d-4172-8d1e-505f265d8c6c" />
+		</on-error-propagate>
+	</error-handler>
+</mule>
